@@ -52,6 +52,14 @@ play.init = function (depth, map){
 	//绑定点击事件（移除旧的避免重复绑定）
 	com.canvas.removeEventListener("click",play.clickCanvas);
 	com.canvas.addEventListener("click",play.clickCanvas);
+	
+	//添加触摸事件支持（移动端）
+	com.canvas.removeEventListener("touchstart",play.touchHandler);
+	com.canvas.addEventListener("touchstart",play.touchHandler, {passive: false});
+	
+	//阻止Canvas的默认触摸行为（防止页面滚动和缩放）
+	com.canvas.removeEventListener("touchmove",play.preventDefaultTouch);
+	com.canvas.addEventListener("touchmove",play.preventDefaultTouch, {passive: false});
 	//clearInterval(play.timer);
 	//com.get("autoPlay").addEventListener("click", function(e) {
 		//clearInterval(play.timer);
@@ -310,11 +318,28 @@ play.indexOfPs = function (ps,xy){
 	
 }
 
-//获得点击的着点
+//获得点击的着点（支持鼠标和触摸）
 play.getClickPoint = function (e){
 	var domXY = com.getDomXY(com.canvas);
-	var x=Math.round((e.pageX-domXY.x-com.pointStartX-20)/com.spaceX);
-	var y=Math.round((e.pageY-domXY.y-com.pointStartY-20)/com.spaceY);
+	var pageX, pageY;
+	
+	// 处理触摸事件和鼠标事件
+	if (e.touches && e.touches.length > 0) {
+		// 触摸事件
+		pageX = e.touches[0].pageX;
+		pageY = e.touches[0].pageY;
+	} else if (e.changedTouches && e.changedTouches.length > 0) {
+		// touchend 事件
+		pageX = e.changedTouches[0].pageX;
+		pageY = e.changedTouches[0].pageY;
+	} else {
+		// 鼠标事件
+		pageX = e.pageX;
+		pageY = e.pageY;
+	}
+	
+	var x=Math.round((pageX-domXY.x-com.pointStartX-20)/com.spaceX);
+	var y=Math.round((pageY-domXY.y-com.pointStartY-20)/com.spaceY);
 	// 边界限制
 	x = Math.max(0, Math.min(8, x));
 	y = Math.max(0, Math.min(9, y));
@@ -337,5 +362,16 @@ play.showWin = function (my){
 	}else{
 		alert("很遗憾，你输了！");
 	}
+}
+
+//触摸事件处理器（转换为点击事件）
+play.touchHandler = function(e) {
+	e.preventDefault(); // 阻止默认行为（如滚动）
+	play.clickCanvas(e);
+}
+
+//阻止Canvas默认触摸行为
+play.preventDefaultTouch = function(e) {
+	e.preventDefault();
 }
 

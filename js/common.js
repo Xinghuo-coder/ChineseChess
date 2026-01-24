@@ -6,13 +6,18 @@ com.init = function (stype){
 	
 	com.nowStype= stype || com.getCookie("stype") ||"stype2";
 	var stype = com.stype[com.nowStype];
-	com.width			=	stype.width;		//画布宽度
-	com.height			=	stype.height; 		//画布高度
-	com.spaceX			=	stype.spaceX;		//着点X跨度
-	com.spaceY			=	stype.spaceY;		//着点Y跨度
-	com.pointStartX		=	stype.pointStartX;	//第一个着点X坐标;
-	com.pointStartY		=	stype.pointStartY;	//第一个着点Y坐标;
+	
+	// 响应式调整：根据屏幕宽度自动缩放
+	var scale = com.getResponsiveScale(stype.width);
+	
+	com.width			=	stype.width * scale;		//画布宽度
+	com.height			=	stype.height * scale; 		//画布高度
+	com.spaceX			=	stype.spaceX * scale;		//着点X跨度
+	com.spaceY			=	stype.spaceY * scale;		//着点Y跨度
+	com.pointStartX		=	stype.pointStartX * scale;	//第一个着点X坐标;
+	com.pointStartY		=	stype.pointStartY * scale;	//第一个着点Y坐标;
 	com.page			=	stype.page;			//图片目录
+	com.scale			=	scale;				//缩放比例
 	
 	com.canvas			=	document.getElementById("chess"); //画布
 	com.ct				=	com.canvas.getContext("2d") ;
@@ -24,6 +29,15 @@ com.init = function (stype){
 
 	com.loadImages(com.page);		//载入图片/图片目录
 	//z(com.initMap.join())
+}
+
+//计算响应式缩放比例
+com.getResponsiveScale = function(baseWidth) {
+	var screenWidth = window.innerWidth || document.documentElement.clientWidth;
+	var maxWidth = Math.min(screenWidth - 40, baseWidth); // 留20px边距
+	var scale = maxWidth / baseWidth;
+	// 限制缩放范围：最小0.5倍，最大1倍
+	return Math.max(0.5, Math.min(1, scale));
 }
 
 //样式
@@ -72,6 +86,30 @@ window.onload = function(){
 	//com.createMans(com.initMap)		//生成棋子
 	//com.bg.show();
 	//play.init();
+	
+	// 监听窗口大小变化（用于横竖屏切换和窗口调整）
+	var resizeTimer;
+	window.addEventListener('resize', function() {
+		clearTimeout(resizeTimer);
+		resizeTimer = setTimeout(function() {
+			// 重新初始化Canvas尺寸
+			if (play.isPlay) {
+				var currentDepth = play.depth;
+				var currentMap = play.nowMap;
+				com.init(com.nowStype);
+				// 如果游戏正在进行，重新初始化
+				if (play.pace && play.pace.length > 0) {
+					play.init(currentDepth, currentMap);
+					// 重放所有步骤
+					var tempPace = play.pace.slice();
+					play.pace = [];
+					// 这里需要根据实际情况重放棋局
+				}
+			} else {
+				com.init(com.nowStype);
+			}
+		}, 300); // 300ms 防抖
+	});
 	
 	//开始对弈
 	com.get("playBtn").addEventListener("click", function(e) {
@@ -797,7 +835,17 @@ com.class.Man = function (key, x, y){
 		if (this.isShow) {
 			com.ct.save();
 			com.ct.globalAlpha = this.alpha;
-			com.ct.drawImage(com[this.pater].img,com.spaceX * this.x + com.pointStartX , com.spaceY *  this.y +com.pointStartY);
+			// 使用缩放比例调整图片大小
+			var scale = com.scale || 1;
+			var imgWidth = com[this.pater].img.width * scale;
+			var imgHeight = com[this.pater].img.height * scale;
+			com.ct.drawImage(
+				com[this.pater].img,
+				com.spaceX * this.x + com.pointStartX, 
+				com.spaceY * this.y + com.pointStartY,
+				imgWidth,
+				imgHeight
+			);
 			com.ct.restore();
 		}
 	}
