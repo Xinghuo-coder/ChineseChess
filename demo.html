@@ -1,0 +1,339 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>用户认证系统演示</title>
+<style>
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    line-height: 1.6;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background: #f5f5f5;
+}
+
+.demo-card {
+    background: white;
+    border-radius: 10px;
+    padding: 30px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+h1 {
+    color: #667eea;
+    text-align: center;
+}
+
+h2 {
+    color: #333;
+    border-bottom: 2px solid #667eea;
+    padding-bottom: 10px;
+}
+
+.feature-list {
+    list-style: none;
+    padding: 0;
+}
+
+.feature-list li {
+    padding: 10px;
+    margin: 10px 0;
+    background: #f8f9ff;
+    border-left: 4px solid #667eea;
+    border-radius: 4px;
+}
+
+.feature-list li::before {
+    content: "✅ ";
+    margin-right: 10px;
+}
+
+.btn {
+    display: inline-block;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    margin: 10px 5px;
+    transition: transform 0.2s;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+
+.code-block {
+    background: #2d2d2d;
+    color: #f8f8f2;
+    padding: 15px;
+    border-radius: 5px;
+    overflow-x: auto;
+    font-family: 'Courier New', monospace;
+}
+
+.warning {
+    background: #fff3cd;
+    border-left: 4px solid #ffc107;
+    padding: 15px;
+    margin: 20px 0;
+    border-radius: 4px;
+}
+
+.info {
+    background: #d1ecf1;
+    border-left: 4px solid #17a2b8;
+    padding: 15px;
+    margin: 20px 0;
+    border-radius: 4px;
+}
+
+.success {
+    background: #d4edda;
+    border-left: 4px solid #28a745;
+    padding: 15px;
+    margin: 20px 0;
+    border-radius: 4px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+}
+
+table th, table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+table th {
+    background: #667eea;
+    color: white;
+}
+
+table tr:hover {
+    background: #f5f5f5;
+}
+</style>
+</head>
+<body>
+    <div class="demo-card">
+        <h1>🎉 中国象棋 - 用户认证系统演示</h1>
+        
+        <div class="success">
+            <strong>✨ 恭喜！</strong> 用户认证系统已成功集成到项目中！
+        </div>
+        
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="index.html" class="btn">🎮 开始游戏</a>
+            <a href="AUTH_GUIDE.md" class="btn">📖 使用指南</a>
+            <a href="OAUTH_CONFIG.md" class="btn">⚙️ 配置指南</a>
+        </div>
+    </div>
+
+    <div class="demo-card">
+        <h2>🌟 核心功能</h2>
+        <ul class="feature-list">
+            <li>📱 手机号注册登录</li>
+            <li>📧 邮箱注册登录</li>
+            <li>🍎 Apple ID 第三方登录</li>
+            <li>🔍 Google 账号登录</li>
+            <li>👥 Facebook 账号登录</li>
+            <li>💬 微信扫码登录</li>
+            <li>🔐 密码修改和重置</li>
+            <li>📊 游戏战绩自动统计</li>
+            <li>👤 用户信息管理</li>
+            <li>💾 本地数据持久化</li>
+        </ul>
+    </div>
+
+    <div class="demo-card">
+        <h2>🚀 快速开始</h2>
+        
+        <h3>1️⃣ 启动本地服务器</h3>
+        <div class="code-block">
+# Python 3<br>
+python3 -m http.server 8080<br>
+<br>
+# 或者 Python 2<br>
+python -m SimpleHTTPServer 8080<br>
+<br>
+# 然后访问：http://localhost:8080
+        </div>
+
+        <h3>2️⃣ 注册测试账号</h3>
+        <ol>
+            <li>点击页面顶部的"注册"按钮</li>
+            <li>选择注册方式（手机号或邮箱）</li>
+            <li>填写账号信息：
+                <div class="code-block">
+手机号示例：13800138000<br>
+邮箱示例：test@example.com<br>
+密码：至少6位字符
+                </div>
+            </li>
+            <li>点击"注册"完成</li>
+        </ol>
+
+        <h3>3️⃣ 开始游戏</h3>
+        <p>登录后即可开始对弈，系统会自动记录您的战绩！</p>
+    </div>
+
+    <div class="demo-card">
+        <h2>📁 新增文件清单</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>文件</th>
+                    <th>说明</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>js/auth.js</code></td>
+                    <td>用户认证核心模块（30KB+）</td>
+                </tr>
+                <tr>
+                    <td><code>css/auth.css</code></td>
+                    <td>认证界面样式（响应式设计）</td>
+                </tr>
+                <tr>
+                    <td><code>AUTH_GUIDE.md</code></td>
+                    <td>详细使用指南</td>
+                </tr>
+                <tr>
+                    <td><code>OAUTH_CONFIG.md</code></td>
+                    <td>第三方登录配置教程</td>
+                </tr>
+                <tr>
+                    <td><code>img/default-avatar.svg</code></td>
+                    <td>默认用户头像</td>
+                </tr>
+                <tr>
+                    <td><code>img/AVATAR_SETUP.md</code></td>
+                    <td>头像配置说明</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="demo-card">
+        <h2>⚠️ 安全提示</h2>
+        <div class="warning">
+            <strong>注意：</strong>当前版本使用 localStorage 本地存储和简单加密，仅用于演示和学习。<br><br>
+            <strong>生产环境必须：</strong>
+            <ul>
+                <li>✅ 部署后端服务器</li>
+                <li>✅ 使用数据库存储用户数据</li>
+                <li>✅ 使用 bcrypt 等安全算法加密密码</li>
+                <li>✅ 启用 HTTPS</li>
+                <li>✅ 实现邮箱/手机验证</li>
+                <li>✅ 添加防暴力破解机制</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="demo-card">
+        <h2>🔧 第三方登录配置</h2>
+        <div class="info">
+            <strong>提示：</strong>第三方登录需要在对应平台注册应用并获取密钥。<br><br>
+            详细配置步骤请查看 <a href="OAUTH_CONFIG.md">OAUTH_CONFIG.md</a>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>平台</th>
+                    <th>配置难度</th>
+                    <th>状态</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>🔍 Google</td>
+                    <td>⭐⭐</td>
+                    <td>SDK已集成，需配置Client ID</td>
+                </tr>
+                <tr>
+                    <td>👥 Facebook</td>
+                    <td>⭐⭐</td>
+                    <td>SDK已集成，需配置App ID</td>
+                </tr>
+                <tr>
+                    <td>🍎 Apple</td>
+                    <td>⭐⭐⭐</td>
+                    <td>SDK已集成，需配置Service ID</td>
+                </tr>
+                <tr>
+                    <td>💬 微信</td>
+                    <td>⭐⭐⭐⭐</td>
+                    <td>需配置AppID和后端支持</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="demo-card">
+        <h2>📱 移动端支持</h2>
+        <ul class="feature-list">
+            <li>完全响应式设计，自适应各种屏幕</li>
+            <li>优化触摸操作体验</li>
+            <li>防止页面缩放和滚动</li>
+            <li>模态框移动端适配</li>
+            <li>支持打包成Android APK</li>
+        </ul>
+    </div>
+
+    <div class="demo-card">
+        <h2>🎯 下一步建议</h2>
+        <ol>
+            <li><strong>测试基础功能</strong>
+                <ul>
+                    <li>注册新账号</li>
+                    <li>登录/登出</li>
+                    <li>修改密码</li>
+                    <li>游戏战绩统计</li>
+                </ul>
+            </li>
+            <li><strong>配置第三方登录</strong>（可选）
+                <ul>
+                    <li>参考 OAUTH_CONFIG.md</li>
+                    <li>获取各平台密钥</li>
+                    <li>更新 js/auth.js 配置</li>
+                </ul>
+            </li>
+            <li><strong>开发后端API</strong>（可选）
+                <ul>
+                    <li>选择后端技术栈</li>
+                    <li>实现用户API</li>
+                    <li>连接数据库</li>
+                    <li>部署到服务器</li>
+                </ul>
+            </li>
+        </ol>
+    </div>
+
+    <div class="demo-card">
+        <h2>📞 技术支持</h2>
+        <p>如遇到问题或需要帮助：</p>
+        <ul>
+            <li>📖 查看 <a href="AUTH_GUIDE.md">使用指南</a></li>
+            <li>⚙️ 查看 <a href="OAUTH_CONFIG.md">配置文档</a></li>
+            <li>💬 联系原作者 QQ: 28701884</li>
+            <li>📧 邮件: itlwei@163.com</li>
+        </ul>
+    </div>
+
+    <div style="text-align: center; margin: 30px 0;">
+        <a href="index.html" class="btn">🎮 立即开始游戏</a>
+    </div>
+
+    <div style="text-align: center; color: #999; margin-top: 40px;">
+        <p>中国象棋 v2.0.0 | 一叶孤舟 © 2026</p>
+    </div>
+</body>
+</html>

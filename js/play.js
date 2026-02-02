@@ -376,10 +376,25 @@ play.getClickMan = function (e){
 
 play.showWin = function (my){
 	play.isPlay = false;
-	if (my===1){
-		alert("恭喜你，你赢了！");
-	}else{
-		alert("很遗憾，你输了！");
+	
+	// 更新用户游戏统计
+	if (typeof auth !== 'undefined' && auth.currentUser) {
+		if (my === 1) {
+			// 玩家赢了
+			auth.updateGameStats('win');
+			alert("恭喜你，你赢了！");
+		} else {
+			// 玩家输了
+			auth.updateGameStats('loss');
+			alert("很遗憾，你输了！");
+		}
+	} else {
+		// 未登录用户
+		if (my === 1) {
+			alert("恭喜你，你赢了！\n登录后可记录战绩哦~");
+		} else {
+			alert("很遗憾，你输了！\n登录后可记录战绩哦~");
+		}
 	}
 }
 
