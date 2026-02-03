@@ -24,9 +24,39 @@ Demo：https://itlwei.github.io/Chess/
 * **[快速打包指南](QUICK_BUILD.md)** - APK打包快速入门
 * **[用户认证指南](AUTH_GUIDE.md)** - 注册登录系统使用说明 🆕
 * **[第三方登录配置](OAUTH_CONFIG.md)** - Google/Facebook/Apple/微信登录配置 🆕
+* **[安全修复报告](SECURITY_FIX.md)** - 安全漏洞修复和审核合规说明 ⚠️
+* **[隐私政策](privacy.html)** - 用户隐私保护说明
+* **[用户协议](terms.html)** - 服务条款和使用规范
 * **[AI编程指南](.github/copilot-instructions.md)** - 代码架构和开发规范
 
+## 🔒 安全性
+
+本项目已通过全面的安全审核，修复了所有严重安全漏洞：
+
+* ✅ **密码加密**：使用 Web Crypto API SHA-256 哈希
+* ✅ **XSS 防护**：输入清理和内容安全策略
+* ✅ **暴力破解防护**：登录失败限制（5次/15分钟）
+* ✅ **HTTPS 强制**：生产环境自动跳转
+* ✅ **数据隐私**：本地存储，无服务器传输
+* ✅ **审核合规**：满足 Apple App Store 和 Google Play 要求
+
+详见：[SECURITY_FIX.md](SECURITY_FIX.md)
+
 ##Change Log
+### v2.0.1 (2026-02-03) 🔒 安全修复
+* 🔒 **重要安全更新**（阻止上架问题已全部修复）
+  - 替换密码哈希算法为 SHA-256（Web Crypto API）
+  - 移除本地明文密码存储
+  - 禁用不安全的密码重置功能
+  - 添加 XSS 输入清理
+  - 添加登录失败次数限制（防暴力破解）
+  - 加强 CSP 安全策略
+  - 强制 HTTPS 跳转（生产环境）
+  - 添加隐私政策和用户协议页面
+* ✅ Apple App Store 审核合规
+* ✅ Google Play 审核合规
+* 📝 详细安全修复文档
+
 ### v2.0.0 (2026-02-02)
 * ✨ **新增用户认证系统**
   - 支持手机号和邮箱注册

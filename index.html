@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black" />
 <meta name="format-detection" content="telephone=no" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: https://ssl.gstatic.com https://apis.google.com https://connect.facebook.net https://appleid.cdn-apple.com 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src *; img-src 'self' data: content: https:;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap:; script-src 'self' https://ssl.gstatic.com https://apis.google.com https://connect.facebook.net https://appleid.cdn-apple.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src 'self' data:; img-src 'self' data: content: https:; connect-src 'self' https://apis.google.com https://graph.facebook.com https://appleid.apple.com; upgrade-insecure-requests;">
 <link href="css/chess.css" rel="stylesheet" type="text/css">
 <link href="css/auth.css" rel="stylesheet" type="text/css">
 <!--[if lt IE 9]>
@@ -186,8 +186,9 @@
 			
 			<div class="form-footer">
 				<a href="#" id="switchToLogin">已有账号? 立即登录</a>
-			</div>
-		</div>
+			</div>			<div class="form-footer" style="font-size: 12px; color: #999; margin-top: 15px;">
+				注册即表示同意 <a href="terms.html" target="_blank" style="color: #c03;">用户协议</a> 和 <a href="privacy.html" target="_blank" style="color: #c03;">隐私政策</a>
+			</div>		</div>
 	</div>
 </div>
 
@@ -238,6 +239,15 @@
 			</p>
 		</div>
 	</div>
+</div>
+
+<!-- 页脚链接 -->
+<div style="text-align: center; padding: 20px; font-size: 12px; color: #999;">
+	<a href="privacy.html" target="_blank" style="color: #666; text-decoration: none; margin: 0 10px;">隐私政策</a>
+	<span>|</span>
+	<a href="terms.html" target="_blank" style="color: #666; text-decoration: none; margin: 0 10px;">用户协议</a>
+	<span>|</span>
+	<span>© 2026 中国象棋</span>
 </div>
 
 <script type="text/javascript" src="cordova.js"></script>

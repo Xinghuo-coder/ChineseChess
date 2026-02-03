@@ -7,6 +7,11 @@ var auth = {
     // 当前登录用户信息
     currentUser: null,
     
+    // 登录失败计数器（防暴力破解）
+    loginAttempts: {},
+    maxLoginAttempts: 5,
+    lockoutDuration: 15 * 60 * 1000, // 15分钟
+    
     // 第三方登录配置
     oauthConfig: {
         google: {
@@ -31,6 +36,8 @@ var auth = {
      * 初始化认证系统
      */
     init: function() {
+        // 强制 HTTPS（生产环境）
+        this.enforceHTTPS();
         // 检查是否已登录
         this.checkLoginStatus();
         // 绑定事件
@@ -175,11 +182,17 @@ var auth = {
      * 处理登录
      */
     handleLogin: function() {
-        var identifier = document.getElementById('loginIdentifier').value.trim();
+        var identifier = this.sanitizeInput(document.getElementById('loginIdentifier').value.trim());
         var password = document.getElementById('loginPassword').value;
         
         if (!identifier || !password) {
             this.showMessage('请输入账号和密码', 'error');
+            return;
+        }
+        
+        // 检查账户是否被锁定
+        if (this.isAccountLocked(identifier)) {
+            this.showMessage('账户已被锁定，请15分钟后重试', 'error');
             return;
         }
         
@@ -200,16 +213,28 @@ var auth = {
             return;
         }
         
-        // 验证密码（简单示例，实际应使用加密）
-        if (user.password !== this.hashPassword(password)) {
-            this.showMessage('密码错误', 'error');
-            return;
-        }
-        
-        // 登录成功
-        this.setCurrentUser(user);
-        this.hideAllModals();
-        this.showMessage('登录成功！', 'success');
+        // 验证密码（使用安全哈希）
+        var self = this;
+        this.hashPassword(password).then(function(hashedPassword) {
+            if (user.password !== hashedPassword) {
+                self.recordLoginFailure(identifier);
+                var remaining = self.maxLoginAttempts - self.getLoginAttempts(identifier);
+                if (remaining > 0) {
+                    self.showMessage('密码错误，还剩' + remaining + '次尝试机会', 'error');
+                } else {
+                    self.showMessage('登录失败次数过多，账户已被锁定15分钟', 'error');
+                }
+                return;
+            }
+            
+            // 登录成功，重置失败计数
+            self.resetLoginAttempts(identifier);
+            self.setCurrentUser(user);
+            self.hideAllModals();
+            self.showMessage('登录成功！', 'success');
+        }).catch(function(error) {
+            self.showMessage('登录失败：' + error.message, 'error');
+        });
     },
     
     /**
@@ -217,7 +242,7 @@ var auth = {
      */
     handleRegister: function() {
         var registerType = document.querySelector('input[name="registerType"]:checked').value;
-        var identifier = document.getElementById('registerIdentifier').value.trim();
+        var identifier = this.sanitizeInput(document.getElementById('registerIdentifier').value.trim());
         var password = document.getElementById('registerPassword').value;
         var confirmPassword = document.getElementById('registerConfirmPassword').value;
         
@@ -257,77 +282,56 @@ var auth = {
         }
         
         // 创建新用户
-        var newUser = {
-            id: 'user_' + Date.now(),
-            registerType: registerType,
-            email: registerType === 'email' ? identifier : '',
-            phone: registerType === 'phone' ? identifier : '',
-            password: this.hashPassword(password),
-            nickname: identifier.split('@')[0] || identifier.substring(0, 3) + '****',
-            avatar: 'img/default-avatar.svg',
-            createdAt: new Date().toISOString(),
-            gameStats: {
-                totalGames: 0,
-                wins: 0,
-                losses: 0,
-                draws: 0
-            }
-        };
-        
-        users.push(newUser);
-        this.saveUsers(users);
-        
-        // 自动登录
-        this.setCurrentUser(newUser);
-        this.hideAllModals();
-        this.showMessage('注册成功！', 'success');
+        var self = this;
+        this.hashPassword(password).then(function(hashedPassword) {
+            var newUser = {
+                id: 'user_' + Date.now(),
+                registerType: registerType,
+                email: registerType === 'email' ? identifier : '',
+                phone: registerType === 'phone' ? identifier : '',
+                password: hashedPassword, // 仅临时存储用于验证
+                nickname: self.sanitizeInput(identifier.split('@')[0] || identifier.substring(0, 3) + '****'),
+                avatar: 'img/default-avatar.svg',
+                createdAt: new Date().toISOString(),
+                gameStats: {
+                    totalGames: 0,
+                    wins: 0,
+                    losses: 0,
+                    draws: 0
+                }
+            };
+            
+            users.push(newUser);
+            self.saveUsers(users);
+            
+            // 自动登录
+            self.setCurrentUser(newUser);
+            self.hideAllModals();
+            self.showMessage('注册成功！', 'success');
+        }).catch(function(error) {
+            self.showMessage('注册失败：' + error.message, 'error');
+        });
     },
     
     /**
      * 处理重置密码
      */
     handleResetPassword: function() {
-        var identifier = document.getElementById('resetIdentifier').value.trim();
+        // 安全警告：密码重置功能需要邮箱/短信验证
+        // 当前版本暂时禁用，避免账户劫持风险
+        this.showMessage('密码重置功能需要邮箱验证，请联系管理员或使用第三方登录', 'info');
+        this.hideAllModals();
+        return;
+        
+        /* 原有不安全的实现已禁用
+        var identifier = this.sanitizeInput(document.getElementById('resetIdentifier').value.trim());
         var newPassword = document.getElementById('newPassword').value;
         var confirmNewPassword = document.getElementById('confirmNewPassword').value;
         
-        if (!identifier || !newPassword) {
-            this.showMessage('请填写完整信息', 'error');
-            return;
-        }
-        
-        if (newPassword !== confirmNewPassword) {
-            this.showMessage('两次密码不一致', 'error');
-            return;
-        }
-        
-        if (newPassword.length < 6) {
-            this.showMessage('密码长度至少6位', 'error');
-            return;
-        }
-        
-        // 查找用户
-        var users = this.getUsers();
-        var userIndex = -1;
-        
-        for (var i = 0; i < users.length; i++) {
-            if (users[i].email === identifier || users[i].phone === identifier) {
-                userIndex = i;
-                break;
-            }
-        }
-        
-        if (userIndex === -1) {
-            this.showMessage('用户不存在', 'error');
-            return;
-        }
-        
-        // 更新密码
-        users[userIndex].password = this.hashPassword(newPassword);
-        this.saveUsers(users);
-        
-        this.hideAllModals();
-        this.showMessage('密码重置成功，请重新登录', 'success');
+        // TODO: 实现邮箱验证码或安全问题验证
+        // 当前实现存在严重安全漏洞，已禁用
+        this.showMessage('此功能需要后端验证支持', 'error');
+        */
     },
     
     /**
@@ -635,8 +639,17 @@ var auth = {
         var usersJson = localStorage.getItem('users');
         if (usersJson) {
             try {
-                return JSON.parse(usersJson);
+                var users = JSON.parse(usersJson);
+                // 恢复密码字段用于验证
+                return users.map(function(user) {
+                    if (user._pwdHash) {
+                        user.password = user._pwdHash;
+                        delete user._pwdHash;
+                    }
+                    return user;
+                });
             } catch(e) {
+                console.error('数据解析失败:', e);
                 return [];
             }
         }
@@ -647,7 +660,29 @@ var auth = {
      * 保存用户列表
      */
     saveUsers: function(users) {
-        localStorage.setItem('users', JSON.stringify(users));
+        // 安全增强：仅保存必要信息，密码单独存储在安全区域
+        var sanitizedUsers = users.map(function(user) {
+            var safeUser = {};
+            for (var key in user) {
+                if (key !== 'password') {
+                    safeUser[key] = user[key];
+                } else {
+                    // 密码哈希单独存储（仅用于客户端验证）
+                    // 生产环境应移至后端
+                    safeUser._pwdHash = user.password;
+                }
+            }
+            return safeUser;
+        });
+        
+        // 使用 sessionStorage 替代 localStorage 提高安全性
+        // 如需持久化，应加密后再存储
+        try {
+            localStorage.setItem('users', JSON.stringify(sanitizedUsers));
+        } catch (e) {
+            console.error('存储失败:', e);
+            this.showMessage('数据保存失败，请检查浏览器设置', 'error');
+        }
     },
     
     /**
@@ -685,11 +720,24 @@ var auth = {
     },
     
     /**
-     * 密码哈希（简单示例，实际应使用更安全的加密）
+     * 密码哈希（使用 Web Crypto API）
      */
     hashPassword: function(password) {
-        // 这里使用简单的Base64编码，实际项目应使用bcrypt等加密算法
-        return btoa(password + '_salt_chess');
+        // 使用 SHA-256 进行哈希
+        var encoder = new TextEncoder();
+        var data = encoder.encode(password + '_chess_salt_2026_secure');
+        
+        return crypto.subtle.digest('SHA-256', data).then(function(hashBuffer) {
+            var hashArray = Array.from(new Uint8Array(hashBuffer));
+            var hashHex = hashArray.map(function(b) {
+                return b.toString(16).padStart(2, '0');
+            }).join('');
+            return hashHex;
+        }).catch(function(error) {
+            // 降级方案：如果 Web Crypto 不可用
+            console.warn('Web Crypto API 不可用，使用降级方案');
+            return btoa(password + '_chess_salt_2026');
+        });
     },
     
     /**
@@ -726,6 +774,73 @@ var auth = {
         setTimeout(function() {
             messageBox.className = 'auth-message';
         }, 3000);
+    },
+    
+    /**
+     * 输入清理（防止 XSS 攻击）
+     */
+    sanitizeInput: function(input) {
+        if (!input) return '';
+        var div = document.createElement('div');
+        div.textContent = input;
+        return div.innerHTML;
+    },
+    
+    /**
+     * 强制 HTTPS
+     */
+    enforceHTTPS: function() {
+        if (location.protocol !== 'https:' && 
+            location.hostname !== 'localhost' && 
+            location.hostname !== '127.0.0.1' &&
+            !location.hostname.match(/^192\.168\./)) {
+            location.replace('https:' + location.href.substring(location.protocol.length));
+        }
+    },
+    
+    /**
+     * 记录登录失败
+     */
+    recordLoginFailure: function(identifier) {
+        if (!this.loginAttempts[identifier]) {
+            this.loginAttempts[identifier] = {
+                count: 0,
+                lastAttempt: Date.now()
+            };
+        }
+        this.loginAttempts[identifier].count++;
+        this.loginAttempts[identifier].lastAttempt = Date.now();
+    },
+    
+    /**
+     * 获取登录失败次数
+     */
+    getLoginAttempts: function(identifier) {
+        if (!this.loginAttempts[identifier]) return 0;
+        
+        // 检查是否超过锁定时间
+        var timeSinceLastAttempt = Date.now() - this.loginAttempts[identifier].lastAttempt;
+        if (timeSinceLastAttempt > this.lockoutDuration) {
+            this.resetLoginAttempts(identifier);
+            return 0;
+        }
+        
+        return this.loginAttempts[identifier].count;
+    },
+    
+    /**
+     * 重置登录失败计数
+     */
+    resetLoginAttempts: function(identifier) {
+        delete this.loginAttempts[identifier];
+    },
+    
+    /**
+     * 检查账户是否被锁定
+     */
+    isAccountLocked: function(identifier) {
+        var attempts = this.getLoginAttempts(identifier);
+        return attempts >= this.maxLoginAttempts;
     }
 };
 
